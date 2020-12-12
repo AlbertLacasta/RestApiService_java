@@ -1,10 +1,10 @@
-package com.storm.storm;
+package com.moock.moockapiservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class StormApiApplicationTests {
+class MoockApiServiceApplicationTests {
 
 	@Test
 	void contextLoads() {

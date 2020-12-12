@@ -1,13 +1,13 @@
-package com.storm.storm;
+package com.moock.moockapiservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class StormApiApplication {
+public class MoockApiServiceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(StormApiApplication.class, args);
+		SpringApplication.run(MoockApiServiceApplication.class, args);
 	}
 
 }
