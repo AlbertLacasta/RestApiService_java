@@ -8,11 +8,11 @@
 		<version>2.4.1</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.moock</groupId>
-	<artifactId>moock-api-service</artifactId>
+	<groupId>com.storm</groupId>
+	<artifactId>storm-api-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>moock-api-service</name>
-	<description>REST API for moock app</description>
+	<name>storm-api-service</name>
+	<description>REST API </description>
 
 	<properties>
 		<java.version>11</java.version>
