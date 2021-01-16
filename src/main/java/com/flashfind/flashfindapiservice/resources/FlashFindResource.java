@@ -1,25 +1,31 @@
 package com.flashfind.flashfindapiservice.resources;
 
-import com.moock.moockapiservice.Constants;
-import com.moock.moockapiservice.domain.User;
-import io.jsonwebtoken.JwtBuilder;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
-import javax.crypto.spec.SecretKeySpec;
-import javax.xml.bind.DatatypeConverter;
-import java.security.Key;
-import java.util.Date;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/flashfind")
 public class FlashFindResource {
 
+    @Autowired
+    JdbcTemplate jdbcTemplate;
+
+    /**
+     *
+     * @param user
+     * @param id
+     * @return
+     */
     @GetMapping("/hello/{id}/{user}")
     public ResponseEntity<String> getHello(
             @PathVariable String user,
@@ -29,41 +35,43 @@ public class FlashFindResource {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     *
+     * @return
+     */
+    @GetMapping("/items")
+    public ResponseEntity< List<Map<String, Object>>> getItems() {
+        try {
+            List<Map<String, Object>> response = jdbcTemplate.queryForList(
+            "select * from ff_items"
+            );
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     /*************************************************************/
     /** PRIVATE FUNCTIONS                                       **/
     /*************************************************************/
-    /**
-     *  TOKEN GENERATOR
-     *
-     * @param user
-     * @return
-     */
-    private Map<String, String> __generateJWTToken(User user) {
-        //The JWT signature algorithm we will be using to sign the token
-        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
 
-        long nowMillis = System.currentTimeMillis();
-        Date now = new Date(nowMillis);
+    private List<Map<String, Object>> __reultSet2MapArray(ResultSet rs, int rowNum)
+            throws SQLException
+    {
+        List<Map<String, Object>> mapArray = new ArrayList<>();
 
-        //We will sign our JWT with our ApiKey secret
-        byte[] apiKeySecretBytes = DatatypeConverter.parseBase64Binary(Constants.API_SECRET_KEY);
-        Key signingKey = new SecretKeySpec(apiKeySecretBytes, signatureAlgorithm.getJcaName());
+        while (rs.next()) {
+            Map<String, Object> rsMap = new HashMap<>();
+            for (int col = 1; col <= rs.getMetaData().getColumnCount(); col++) {
+                rsMap.put(rs.getMetaData().getColumnName(col), rs.getObject(col));
+            }
 
-        long timestamp = System.currentTimeMillis();
+            mapArray.add(rsMap);
+        }
 
-        //Let's set the JWT Claims
-        JwtBuilder builder = Jwts.builder()
-                .setIssuedAt(now)
-                .setExpiration(new Date(timestamp + Constants.TOKEN_VALIDITY))
-                .claim("userId", user.getUserId())
-                .claim("email", user.getEmail())
-                .claim("firstName", user.getFirstName())
-                .claim("lastName", user.getLastName())
-                .signWith(signatureAlgorithm, signingKey);
+        rs.close();
 
-        Map<String, String> map = new HashMap<>();
-        map.put("token", builder.compact());
-        return map;
-
+        return mapArray;
     }
+
 }
