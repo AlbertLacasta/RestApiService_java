@@ -13,6 +13,7 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>storm-api-service</name>
 	<description>REST API </description>
+	<packaging>jar</packaging>
 
 	<properties>
 		<java.version>1.8</java.version>
@@ -78,6 +79,7 @@
 				<configuration>
 					<executable>true</executable>
 				</configuration>
+
 			</plugin>
 		</plugins>
 	</build>
