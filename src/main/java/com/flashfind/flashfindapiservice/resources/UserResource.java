@@ -1,5 +1,6 @@
 package com.flashfind.flashfindapiservice.resources;
 
+import com.flashfind.flashfindapiservice.Constants;
 import com.flashfind.flashfindapiservice.types.GoogleAuth;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import io.jsonwebtoken.JwtBuilder;
@@ -28,10 +29,6 @@ import java.util.regex.Pattern;
 public class UserResource {
     @Autowired
     JdbcTemplate jdbcTemplate;
-
-    public static final String API_SECRET_KEY = "flashfindappapikey";
-
-    public static final long TOKEN_VALIDITY = 2 * 60 * 60 * 1000;
 
     @GetMapping("/hello")
     public ResponseEntity<String> getHello() {
@@ -154,7 +151,7 @@ public class UserResource {
         Date now = new Date(nowMillis);
 
         //We will sign our JWT with our ApiKey secret
-        byte[] apiKeySecretBytes = DatatypeConverter.parseBase64Binary(API_SECRET_KEY);
+        byte[] apiKeySecretBytes = DatatypeConverter.parseBase64Binary(Constants.API_SECRET_KEY);
         Key signingKey = new SecretKeySpec(apiKeySecretBytes, signatureAlgorithm.getJcaName());
 
         long timestamp = System.currentTimeMillis();
@@ -162,7 +159,7 @@ public class UserResource {
         //Let's set the JWT Claims
         JwtBuilder builder = Jwts.builder()
                 .setIssuedAt(now)
-                .setExpiration(new Date(timestamp + TOKEN_VALIDITY))
+                .setExpiration(new Date(timestamp + Constants.TOKEN_VALIDITY))
                 .claim("userId", userId)
                 .claim("email", email)
                 .claim("firstName", firstName)

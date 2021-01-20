@@ -1,7 +1,5 @@
 package com.flashfind.flashfindapiservice.resources;
 
-import com.flashfind.flashfindapiservice.types.GoogleAuth;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
