@@ -1,5 +1,6 @@
 package com.flashfind.flashfindapiservice;
 
+import com.moock.moockapiservice.filters.AuthFilters;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -11,7 +12,6 @@ public class FlashFindApiServiceApplication {
     public static void main(String[] args) {
         SpringApplication.run(FlashFindApiServiceApplication.class, args);
     }
-/*
     @Bean
     public FilterRegistrationBean<AuthFilters> filterRegistrationBean() {
         FilterRegistrationBean<AuthFilters> registrationBean = new FilterRegistrationBean<>();
@@ -19,9 +19,9 @@ public class FlashFindApiServiceApplication {
         registrationBean.setFilter(authFilter);
 
         // Protected api's that has to receive a token to return a response
-        registrationBean.addUrlPatterns("/api/flashfind/*");
+        //registrationBean.addUrlPatterns("/api/flashfind/*");
 
         return registrationBean;
     }
-    */
+
 }

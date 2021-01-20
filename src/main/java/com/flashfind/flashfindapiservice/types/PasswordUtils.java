@@ -1,4 +1,4 @@
-package com.flashfind.flashfindapiservice.utils;
+package com.flashfind.flashfindapiservice.types;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
