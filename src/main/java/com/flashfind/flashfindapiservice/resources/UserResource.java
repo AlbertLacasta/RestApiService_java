@@ -33,6 +33,12 @@ public class UserResource {
 
     public static final long TOKEN_VALIDITY = 2 * 60 * 60 * 1000;
 
+    @GetMapping("/hello")
+    public ResponseEntity<String> getHello() {
+        String response = "Hello, api is working";
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
     /**
      *
      * @param userMap
