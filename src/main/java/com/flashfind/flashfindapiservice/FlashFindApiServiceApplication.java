@@ -19,7 +19,7 @@ public class FlashFindApiServiceApplication {
         registrationBean.setFilter(authFilter);
 
         // Protected api's that has to receive a token to return a response
-        //registrationBean.addUrlPatterns("/api/flashfind/*");
+        registrationBean.addUrlPatterns("/api/public/*");
 
         return registrationBean;
     }
