@@ -24,7 +24,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/public")
 public class UserResource {
     @Autowired
     JdbcTemplate jdbcTemplate;
