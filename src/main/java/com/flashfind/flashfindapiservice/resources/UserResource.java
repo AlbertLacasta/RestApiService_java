@@ -50,12 +50,14 @@ public class UserResource {
         if(email != null) {
             email.toLowerCase();
         }
+
         Map<String, Object> user = jdbcTemplate.queryForObject(
         "SELECT USER_ID, FIRST_NAME, LAST_NAME, EMAIL, PASSWORD FROM FF_USERS WHERE EMAIL = ?",
-            new Object[]{email}, rowMapped
+            new Object[]{email}, userRowMapped
         );
 
-        if(!BCrypt.checkpw(password, (String) user.get("password"))) {
+        // TODO: make in client side
+        if(!password.equals(user.get("password"))) {
             throw new Exception("Invalid email/password.");
         }
 
@@ -103,12 +105,15 @@ public class UserResource {
             KeyHolder keyHolder = new GeneratedKeyHolder();
             jdbcTemplate.update(connection -> {
                 PreparedStatement ps = connection.prepareStatement(
-                        "INSERT INTO FF_USERS(USER_ID, FIRST_NAME, LAST_NAME, EMAIL, PASSWORD) VALUES(NEXTVAL('FF_USERS_SEQ'), ?, ?, ?, ?)"
-                        , Statement.RETURN_GENERATED_KEYS);
-                        ps.setString(1, firstName);
-                        ps.setString(2, lastName);
-                        ps.setString(3, email);
-                        ps.setString(4, password);
+                "INSERT INTO FF_USERS(USER_ID, FIRST_NAME, LAST_NAME, EMAIL, PASSWORD) VALUES(NEXTVAL(?), ?, ?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS
+                );
+                ps.setString(1, "ff_users_seq");
+                ps.setString(2, firstName);
+                ps.setString(3, lastName);
+                ps.setString(4, email);
+                ps.setString(5, password);
+
                 return ps;
             }, keyHolder);
 
@@ -174,18 +179,13 @@ public class UserResource {
     /**
      *
      */
-    private RowMapper<Map<String, Object>> rowMapped = ((rs, rowNum) -> {
-        Map<String, Object> rsMap = new HashMap<>();
-
-        if(rs.next()) {
-            for (int col = 1; col <= rs.getMetaData().getColumnCount(); col++) {
-                rsMap.put(rs.getMetaData().getColumnName(col), rs.getObject(col));
-            }
-        }
-
-        rs.close();
-
-        return rsMap;
+    private RowMapper<HashMap<String, Object>> userRowMapped = ((rs, rowNum) -> {
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("user_id", rs.getInt("USER_ID"));
+        map.put("first_name", rs.getString("FIRST_NAME"));
+        map.put("last_name", rs.getString("LAST_NAME"));
+        map.put("email", rs.getString("EMAIL"));
+        map.put("password", rs.getString("PASSWORD"));
+        return map;
     });
-
 }

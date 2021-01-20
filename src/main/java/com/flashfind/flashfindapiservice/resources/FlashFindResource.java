@@ -59,7 +59,7 @@ public class FlashFindResource {
     /** PRIVATE FUNCTIONS                                       **/
     /*************************************************************/
 
-    private List<Map<String, Object>> __reultSet2MapArray(ResultSet rs, int rowNum)
+    private List<Map<String, Object>> __resultSet2MapArray(ResultSet rs, int rowNum)
             throws SQLException
     {
         List<Map<String, Object>> mapArray = new ArrayList<>();
