@@ -17,6 +17,7 @@
 
 	<properties>
 		<java.version>1.8</java.version>
+		<start-class>com.flashfind.flashfindapiservice.FlashFindApiServiceApplication</start-class>
 	</properties>
 
 	<dependencies>
