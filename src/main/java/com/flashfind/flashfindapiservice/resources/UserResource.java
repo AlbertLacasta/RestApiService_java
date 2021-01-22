@@ -6,7 +6,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.mindrot.jbcrypt.BCrypt;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,10 +43,10 @@ public class UserResource {
      * @throws Exception
      */
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> loginUser(@RequestBody Map<String, Object> userMap) throws Exception {
-        String email        = (String) userMap.get("email");
-        String password     = (String) userMap.get("password");
-
+    public ResponseEntity<Map<String, String>> loginUser(@RequestBody String userMap) throws Exception {
+        JSONObject json = new JSONObject(userMap);
+        String email        = json.getString("email");
+        String password     = json.getString("password");
         if(email != null) {
             email.toLowerCase();
         }
@@ -77,11 +77,12 @@ public class UserResource {
      * @return
      */
     @PostMapping("/register")
-    public ResponseEntity<Map<String, String>> registerUser(@RequestBody Map<String, Object> userMap) throws Exception {
-        String firstName    = (String) userMap.get("firstName");
-        String lastName     = (String) userMap.get("lastName");
-        String email        = (String) userMap.get("email");
-        String password     = (String) userMap.get("password");
+    public ResponseEntity<Map<String, String>> registerUser(@RequestBody String userMap) throws Exception {
+        JSONObject json = new JSONObject(userMap);
+        String firstName = json.getString("firstname");
+        String lastName = json.getString("lastname");
+        String email = json.getString("email");
+        String password = json.getString("password");
 
         Pattern pattern = Pattern.compile("^(.+)@(.+)$");
         if(email != null) {
@@ -118,6 +119,7 @@ public class UserResource {
             }, keyHolder);
 
             Integer userId = (Integer) keyHolder.getKeys().get("USER_ID");
+
             return new ResponseEntity<>(__generateJWTToken(userId, firstName, lastName, email), HttpStatus.OK);
         } catch(Exception e) {
             throw new Exception("Invalid details. Failed to create account");
