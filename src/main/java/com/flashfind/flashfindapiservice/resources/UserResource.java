@@ -30,12 +30,6 @@ public class UserResource {
     @Autowired
     JdbcTemplate jdbcTemplate;
 
-    @GetMapping("/hello")
-    public ResponseEntity<String> getHello() {
-        String response = "Hello, api is working";
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
     /**
      *
      * @param userMap
@@ -62,10 +56,10 @@ public class UserResource {
         }
 
         Map<String, String> tokenMap = __generateJWTToken(
-                (Integer) user.get("user_id"),
-                (String) user.get("first_name"),
-                (String) user.get("last_name"),
-                (String) user.get("email")
+            (Integer) user.get("user_id"),
+            (String) user.get("first_name"),
+            (String) user.get("last_name"),
+            (String) user.get("email")
         );
 
         return new ResponseEntity<>(tokenMap, HttpStatus.OK);
