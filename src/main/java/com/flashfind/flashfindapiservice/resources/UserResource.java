@@ -1,7 +1,7 @@
 package com.flashfind.flashfindapiservice.resources;
 
 import com.flashfind.flashfindapiservice.Constants;
-import com.flashfind.flashfindapiservice.types.GoogleAuth;
+import com.flashfind.flashfindapiservice.utils.GoogleAuth;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
@@ -38,7 +38,7 @@ public class UserResource {
      */
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> loginUser(@RequestBody String userMap) throws Exception {
-        JSONObject json = new JSONObject(userMap);
+        JSONObject json     = new JSONObject(userMap);
         String email        = json.getString("email");
         String password     = json.getString("password");
         if(email != null) {
@@ -184,4 +184,15 @@ public class UserResource {
         map.put("password", rs.getString("PASSWORD"));
         return map;
     });
+
+    /**
+     *
+     */
+    private RowMapper<HashMap<String, Object>> rowMapped = ((rs, rowNum) -> {
+        HashMap<String, Object> map = new HashMap<>();
+
+        map.put("password", rs.getString("PASSWORD"));
+        return map;
+    });
+
 }
