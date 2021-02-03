@@ -76,7 +76,6 @@ public class UserResource {
         String password = json.getString("password");
         String username = json.getString("username");
         String salt = "";
-        Date register_date = new Date(System.currentTimeMillis());
 
         Pattern pattern = Pattern.compile("^(.+)@(.+)$");
         if(email != null) {
@@ -108,7 +107,7 @@ public class UserResource {
                 ps.setString(3, password);
                 ps.setString(4, salt);
                 ps.setString(5, username);
-                ps.setString(6, register_date);
+                ps.setDate(6, new java.sql.Date(System.currentTimeMillis()));
 
                 return ps;
             }, keyHolder);
