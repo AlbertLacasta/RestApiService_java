@@ -10,13 +10,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 import java.security.Key;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
 
 @RestController
@@ -43,7 +47,7 @@ public class FlashFindResource {
      * @return
      */
     @GetMapping("/products")
-    public ResponseEntity< List<Map<String, Object>>> getProducts() {
+    public ResponseEntity<List<Map<String, Object>>> getProducts() {
         try {
             List<Map<String, Object>> response = jdbcTemplate.queryForList(
                 "SELECT product_id, categories.category_id, categories.category_name, " +
@@ -66,7 +70,7 @@ public class FlashFindResource {
      * @return
      */
     @PostMapping("/product")
-    public ResponseEntity< List<Map<String, Object>>> createProduct(@RequestHeader("Authorization") String auth,  @RequestBody String userMap) {
+    public ResponseEntity<String> createProduct(@RequestHeader("Authorization") String auth,  @RequestBody String userMap) {
         try {
             Claims decodedToken = __decodeJWT(auth);
 
@@ -102,6 +106,43 @@ public class FlashFindResource {
             );
 
             return new ResponseEntity<>(HttpStatus.OK);
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     *
+     * @param auth
+     * @param product_id
+     * @return
+     */
+    @PostMapping("/product/{product_id}/wishlist")
+    public ResponseEntity<Integer> addToWishlist(
+            @RequestHeader("Authorization") String auth,
+            @PathVariable int product_id
+    ) {
+        try {
+            // Get user id from token
+            Claims decodedToken     = __decodeJWT(auth);
+            int user_id             = (int) decodedToken.get("userId");
+
+            KeyHolder keyHolder = new GeneratedKeyHolder();
+            jdbcTemplate.update(connection -> {
+                PreparedStatement ps = connection.prepareStatement(
+                        "INSERT INTO favourites(fav_id, product_id, user_id) VALUES(NEXTVAL(?), ?, ?)",
+                        Statement.RETURN_GENERATED_KEYS
+                );
+                ps.setString(1, "favourites_fav_id_seq");
+                ps.setInt(2, product_id);
+                ps.setInt(3, user_id);
+
+                return ps;
+            }, keyHolder);
+
+            Integer fav_id = (Integer) keyHolder.getKeys().get("fav_id");
+
+            return new ResponseEntity<>(fav_id, HttpStatus.OK);
         } catch(Exception e) {
             throw new RuntimeException(e);
         }
