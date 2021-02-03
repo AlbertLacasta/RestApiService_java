@@ -76,6 +76,7 @@ public class UserResource {
         String password = json.getString("password");
         String username = json.getString("username");
         String salt = "";
+        Date register_date = new Date(System.currentTimeMillis());
 
         Pattern pattern = Pattern.compile("^(.+)@(.+)$");
         if(email != null) {
@@ -99,7 +100,7 @@ public class UserResource {
             KeyHolder keyHolder = new GeneratedKeyHolder();
             jdbcTemplate.update(connection -> {
                 PreparedStatement ps = connection.prepareStatement(
-                "INSERT INTO USERS(USER_ID, USER_EMAIL, USER_PASSWORD, USER_SALT, USER_USERNAME) VALUES(NEXTVAL(?), ?, ?, ?, ?)",
+                "INSERT INTO USERS(USER_ID, USER_EMAIL, USER_PASSWORD, USER_SALT, USER_USERNAME, USER_REGISTER_DATE) VALUES(NEXTVAL(?), ?, ?, ?, ?, ?)",
                     Statement.RETURN_GENERATED_KEYS
                 );
                 ps.setString(1, "users_user_id_seq");
@@ -107,6 +108,7 @@ public class UserResource {
                 ps.setString(3, password);
                 ps.setString(4, salt);
                 ps.setString(5, username);
+                ps.setString(6, register_date);
 
                 return ps;
             }, keyHolder);
@@ -115,8 +117,8 @@ public class UserResource {
 
             return new ResponseEntity<>(__generateJWTToken(userId, email, username), HttpStatus.OK);
         } catch(Exception e) {
-            //throw new Exception(e);
-            throw new Exception("Invalid details. Failed to create account");
+            throw new Exception(e);
+            //throw new Exception("Invalid details. Failed to create account");
         }
     }
 
