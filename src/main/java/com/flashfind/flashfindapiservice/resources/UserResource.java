@@ -46,9 +46,10 @@ public class UserResource {
         }
 
         Map<String, Object> user = jdbcTemplate.queryForObject(
-        "SELECT USER_ID, FIRST_NAME, LAST_NAME, EMAIL, PASSWORD FROM FF_USERS WHERE EMAIL = ?",
+        "SELECT USER_ID, EMAIL, PASSWORD FROM FF_USERS WHERE EMAIL = ?",
             new Object[]{email}, userRowMapped
         );
+        //"SELECT USER_ID, FIRST_NAME, LAST_NAME, EMAIL, PASSWORD FROM FF_USERS WHERE EMAIL = ?",
 
         // TODO: make in client side
         if(!password.equals(user.get("password"))) {
@@ -57,10 +58,10 @@ public class UserResource {
 
         Map<String, String> tokenMap = __generateJWTToken(
             (Integer) user.get("user_id"),
-            (String) user.get("first_name"),
-            (String) user.get("last_name"),
             (String) user.get("email")
         );
+        //(String) user.get("first_name"),
+            //(String) user.get("last_name"),
 
         return new ResponseEntity<>(tokenMap, HttpStatus.OK);
     }
@@ -115,7 +116,8 @@ public class UserResource {
 
             Integer userId = (Integer) keyHolder.getKeys().get("USER_ID");
 
-            return new ResponseEntity<>(__generateJWTToken(userId, firstName, lastName, email), HttpStatus.OK);
+            return new ResponseEntity<>(__generateJWTToken(userId, email), HttpStatus.OK);
+            //return new ResponseEntity<>(__generateJWTToken(userId, firstName, lastName, email), HttpStatus.OK);
         } catch(Exception e) {
             throw new Exception("Invalid details. Failed to create account");
         }
@@ -145,7 +147,7 @@ public class UserResource {
      * @param email
      * @return
      */
-    private Map<String, String> __generateJWTToken(Integer userId, String firstName, String lastName, String email) {
+    private Map<String, String> __generateJWTToken(Integer userId, String email) {
         //The JWT signature algorithm we will be using to sign the token
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
 
@@ -164,8 +166,8 @@ public class UserResource {
                 .setExpiration(new Date(timestamp + Constants.TOKEN_VALIDITY))
                 .claim("userId", userId)
                 .claim("email", email)
-                .claim("firstName", firstName)
-                .claim("lastName", lastName)
+                //.claim("firstName", firstName)
+                //.claim("lastName", lastName)
                 .signWith(signatureAlgorithm, signingKey);
 
         Map<String, String> map = new HashMap<>();
@@ -179,8 +181,8 @@ public class UserResource {
     private RowMapper<HashMap<String, Object>> userRowMapped = ((rs, rowNum) -> {
         HashMap<String, Object> map = new HashMap<>();
         map.put("user_id", rs.getInt("USER_ID"));
-        map.put("first_name", rs.getString("FIRST_NAME"));
-        map.put("last_name", rs.getString("LAST_NAME"));
+        //map.put("first_name", rs.getString("FIRST_NAME"));
+        //map.put("last_name", rs.getString("LAST_NAME"));
         map.put("email", rs.getString("EMAIL"));
         map.put("password", rs.getString("PASSWORD"));
         return map;
