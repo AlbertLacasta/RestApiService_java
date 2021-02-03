@@ -46,10 +46,9 @@ public class UserResource {
         }
 
         Map<String, Object> user = jdbcTemplate.queryForObject(
-        "SELECT USER_ID, EMAIL, PASSWORD FROM FF_USERS WHERE EMAIL = ?",
+        "SELECT USER_ID, USER_EMAIL, USER_PASSWORD, USER_USERNAME FROM USERS WHERE USER_EMAIL = ?",
             new Object[]{email}, userRowMapped
         );
-        //"SELECT USER_ID, FIRST_NAME, LAST_NAME, EMAIL, PASSWORD FROM FF_USERS WHERE EMAIL = ?",
 
         // TODO: make in client side
         if(!password.equals(user.get("password"))) {
@@ -58,10 +57,9 @@ public class UserResource {
 
         Map<String, String> tokenMap = __generateJWTToken(
             (Integer) user.get("user_id"),
-            (String) user.get("email")
+            (String) user.get("email"),
+            (String) user.get("username")
         );
-        //(String) user.get("first_name"),
-            //(String) user.get("last_name"),
 
         return new ResponseEntity<>(tokenMap, HttpStatus.OK);
     }
@@ -74,10 +72,10 @@ public class UserResource {
     @PostMapping("/register")
     public ResponseEntity<Map<String, String>> registerUser(@RequestBody String userMap) throws Exception {
         JSONObject json = new JSONObject(userMap);
-        //String firstName = json.getString("firstname");
-        //String lastName = json.getString("lastname");
         String email = json.getString("email");
         String password = json.getString("password");
+        String username = json.getString("username");
+        String salt = "";
 
         Pattern pattern = Pattern.compile("^(.+)@(.+)$");
         if(email != null) {
@@ -89,7 +87,7 @@ public class UserResource {
         }
 
         Integer count = jdbcTemplate.queryForObject(
-        "SELECT COUNT(*) FROM FF_USERS WHERE EMAIL = ?",
+        "SELECT COUNT(*) FROM USERS WHERE USER_EMAIL = ?",
             new Object[]{email}, Integer.class
         );
 
@@ -101,24 +99,23 @@ public class UserResource {
             KeyHolder keyHolder = new GeneratedKeyHolder();
             jdbcTemplate.update(connection -> {
                 PreparedStatement ps = connection.prepareStatement(
-                "INSERT INTO FF_USERS(USER_ID, EMAIL, PASSWORD) VALUES(NEXTVAL(?), ?, ?)",
-                //"INSERT INTO FF_USERS(USER_ID, FIRST_NAME, LAST_NAME, EMAIL, PASSWORD) VALUES(NEXTVAL(?), ?, ?, ?, ?)",
+                "INSERT INTO USERS(USER_ID, USER_EMAIL, USER_PASSWORD, USER_SALT, USER_USERNAME) VALUES(NEXTVAL(?), ?, ?, ?, ?)",
                     Statement.RETURN_GENERATED_KEYS
                 );
-                ps.setString(1, "ff_users_seq");
-                //ps.setString(2, firstName);
-                //ps.setString(3, lastName);
+                ps.setString(1, "users_user_id_seq");
                 ps.setString(2, email);
                 ps.setString(3, password);
+                ps.setString(4, salt);
+                ps.setString(5, username);
 
                 return ps;
             }, keyHolder);
 
             Integer userId = (Integer) keyHolder.getKeys().get("USER_ID");
 
-            return new ResponseEntity<>(__generateJWTToken(userId, email), HttpStatus.OK);
-            //return new ResponseEntity<>(__generateJWTToken(userId, firstName, lastName, email), HttpStatus.OK);
+            return new ResponseEntity<>(__generateJWTToken(userId, email, username), HttpStatus.OK);
         } catch(Exception e) {
+            //throw new Exception(e);
             throw new Exception("Invalid details. Failed to create account");
         }
     }
@@ -142,12 +139,11 @@ public class UserResource {
      * Generate token
      *
      * @param userId
-     * @param firstName
-     * @param lastName
      * @param email
+     * @param username
      * @return
      */
-    private Map<String, String> __generateJWTToken(Integer userId, String email) {
+    private Map<String, String> __generateJWTToken(Integer userId, String email, String username) {
         //The JWT signature algorithm we will be using to sign the token
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
 
@@ -166,8 +162,7 @@ public class UserResource {
                 .setExpiration(new Date(timestamp + Constants.TOKEN_VALIDITY))
                 .claim("userId", userId)
                 .claim("email", email)
-                //.claim("firstName", firstName)
-                //.claim("lastName", lastName)
+                .claim("username", username)
                 .signWith(signatureAlgorithm, signingKey);
 
         Map<String, String> map = new HashMap<>();
@@ -181,10 +176,9 @@ public class UserResource {
     private RowMapper<HashMap<String, Object>> userRowMapped = ((rs, rowNum) -> {
         HashMap<String, Object> map = new HashMap<>();
         map.put("user_id", rs.getInt("USER_ID"));
-        //map.put("first_name", rs.getString("FIRST_NAME"));
-        //map.put("last_name", rs.getString("LAST_NAME"));
         map.put("email", rs.getString("EMAIL"));
         map.put("password", rs.getString("PASSWORD"));
+        map.put("username", rs.getString("USER_USERNAME"));
         return map;
     });
 
