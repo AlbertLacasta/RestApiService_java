@@ -73,8 +73,8 @@ public class UserResource {
     @PostMapping("/register")
     public ResponseEntity<Map<String, String>> registerUser(@RequestBody String userMap) throws Exception {
         JSONObject json = new JSONObject(userMap);
-        String firstName = json.getString("firstname");
-        String lastName = json.getString("lastname");
+        //String firstName = json.getString("firstname");
+        //String lastName = json.getString("lastname");
         String email = json.getString("email");
         String password = json.getString("password");
 
@@ -100,14 +100,15 @@ public class UserResource {
             KeyHolder keyHolder = new GeneratedKeyHolder();
             jdbcTemplate.update(connection -> {
                 PreparedStatement ps = connection.prepareStatement(
-                "INSERT INTO FF_USERS(USER_ID, FIRST_NAME, LAST_NAME, EMAIL, PASSWORD) VALUES(NEXTVAL(?), ?, ?, ?, ?)",
+                "INSERT INTO FF_USERS(USER_ID, EMAIL, PASSWORD) VALUES(NEXTVAL(?), ?, ?)",
+                //"INSERT INTO FF_USERS(USER_ID, FIRST_NAME, LAST_NAME, EMAIL, PASSWORD) VALUES(NEXTVAL(?), ?, ?, ?, ?)",
                     Statement.RETURN_GENERATED_KEYS
                 );
                 ps.setString(1, "ff_users_seq");
-                ps.setString(2, firstName);
-                ps.setString(3, lastName);
-                ps.setString(4, email);
-                ps.setString(5, password);
+                //ps.setString(2, firstName);
+                //ps.setString(3, lastName);
+                ps.setString(2, email);
+                ps.setString(3, password);
 
                 return ps;
             }, keyHolder);
