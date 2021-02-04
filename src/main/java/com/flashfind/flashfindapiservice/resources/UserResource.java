@@ -177,8 +177,8 @@ public class UserResource {
     private RowMapper<HashMap<String, Object>> userRowMapped = ((rs, rowNum) -> {
         HashMap<String, Object> map = new HashMap<>();
         map.put("user_id", rs.getInt("USER_ID"));
-        map.put("email", rs.getString("EMAIL"));
-        map.put("password", rs.getString("PASSWORD"));
+        map.put("email", rs.getString("USER_EMAIL"));
+        map.put("password", rs.getString("USER_PASSWORD"));
         map.put("username", rs.getString("USER_USERNAME"));
         return map;
     });
