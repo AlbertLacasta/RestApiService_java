@@ -32,7 +32,6 @@ public class FlashFindResource {
 
     @GetMapping("/hello")
     public ResponseEntity<String> getHello(@RequestHeader("Authorization") String auth) {
-
         Claims decodedToken = __decodeJWT(auth);
         System.out.println(decodedToken.get("userId"));
         return new ResponseEntity<>(auth, HttpStatus.OK);
@@ -50,15 +49,12 @@ public class FlashFindResource {
     public ResponseEntity<List<Map<String, Object>>> getProducts() {
         try {
             List<Map<String, Object>> response = jdbcTemplate.queryForList(
-                "SELECT product_id, categories.category_id, categories.category_name, " +
-                        "active, product_title, product_desc, multiscan, products.user_owned, " +
-                        "users.user_username, visit_count, aprox_radius, aprox_latitude, " +
-                        "aprox_longitude, city, zip " +
-                        "FROM products, categories, users " +
-                        "WHERE products.category_id = categories.category_id " +
-                        "AND products.user_owned = users.user_id"
+                "SELECT products.product_id, product_title, products.user_owned, favourites.fav_id " +
+                    "FROM products, favourites " +
+                    "WHERE active = true " +
+                    "AND favourites.product_id = products.product_id " +
+                    "ORDER BY date_created DESC"
             );
-
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch(Exception e) {
             throw new RuntimeException(e);
