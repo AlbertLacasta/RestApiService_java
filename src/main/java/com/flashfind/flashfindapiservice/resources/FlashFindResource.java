@@ -5,6 +5,9 @@ import com.flashfind.flashfindapiservice.utils.QRCode;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,6 +33,10 @@ public class FlashFindResource {
     @Autowired
     JdbcTemplate jdbcTemplate;
 
+    @Operation(summary = "Hello World api endpoint example", description = "This api called hello returns an id from the token that receive")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "successful operation"),
+    })
     @GetMapping("/hello")
     public ResponseEntity<String> getHello(@RequestHeader("Authorization") String auth) {
         Claims decodedToken = __decodeJWT(auth);
