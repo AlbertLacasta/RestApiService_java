@@ -30,7 +30,7 @@ This Rest Api service allows to work with the following databases:
 * postgreSQL
 
 ## API documentation
-THis engine allows to generate a full documentation from tour endpoints.
+This engine allows to generate a full documentation from tour endpoints.
 
 ### WADL
 The **Web Application Description Language (WADL)** is a machine-readable **XML** description of HTTP-based web services.
@@ -66,7 +66,7 @@ For run the documentation you have to make a **GET** request to this URL:
 http://localhost:8080/v3/api-docs
 ```
 
-##Build and run
+## Build and run
 
 ### Prerequisites
 
