@@ -52,14 +52,12 @@ public class UserResource {
      */
     @Operation(summary = "Login user", description = "This api allows user to login and receive a token")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "successful operation. Returns token map with useful data"),
+        @ApiResponse(responseCode = "200", description = "successful operation. Returns token map with useful data"),
     })
-    @GetMapping(value = "/login", produces = { "application/json" })
-    @PostMapping("/login")
+    @PostMapping(value="/login",  produces = { "application/json" })
     public ResponseEntity<Map<String, String>> loginUser(
             @Parameter(description="A map that contains the user and password") @RequestBody String userMap
     ) throws Exception {
-
         JSONObject json     = new JSONObject(userMap);
         String email        = json.getString("email");
         String password     = json.getString("password");
