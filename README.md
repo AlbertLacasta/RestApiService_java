@@ -65,6 +65,11 @@ For run the documentation you have to make a **GET** request to this URL:
 ```
 http://localhost:8080/v3/api-docs
 ```
+### Swagger
+
+```
+http://localhost:8080/swagger-ui/index.html?url=/v3/api-docs&validatorUrl=#/
+```
 
 ## Build and run
 

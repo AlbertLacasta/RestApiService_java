@@ -3,9 +3,15 @@ package com.flashfind.flashfindapiservice.resources;
 import com.flashfind.flashfindapiservice.Constants;
 import com.flashfind.flashfindapiservice.utils.GoogleAuth;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,10 +31,20 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 @RestController
-@RequestMapping("/api/public")
+@RequestMapping("/public")
 public class UserResource {
     @Autowired
     JdbcTemplate jdbcTemplate;
+
+    @Operation(summary = "Hello World api endpoint example", description = "This api called hello returns an id from the token that receive")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "successful operation"),
+    })
+    @CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST})
+    @GetMapping("/hello")
+    public ResponseEntity<String> getHello() {
+        return new ResponseEntity<>("hello world", HttpStatus.OK);
+    }
 
     /**
      *
@@ -36,8 +52,16 @@ public class UserResource {
      * @return
      * @throws Exception
      */
+    @Operation(summary = "Login user", description = "This api allows user to login and receive a token")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "successful operation. Returns token map with useful data"),
+    })
+    @GetMapping(value = "/login", produces = { "application/json" })
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> loginUser(@RequestBody String userMap) throws Exception {
+    public ResponseEntity<Map<String, String>> loginUser(
+            @Parameter(description="A map that contains the user and password") @RequestBody String userMap
+    ) throws Exception {
+
         JSONObject json     = new JSONObject(userMap);
         String email        = json.getString("email");
         String password     = json.getString("password");

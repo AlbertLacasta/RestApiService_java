@@ -36,7 +36,7 @@ import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 @Controller
-@RequestMapping("/api/v2/application.wadl")
+@RequestMapping("/v2/application.wadl")
 public class WADLControllerV2 {
     String xs_namespace="http://www.w3.org/2001/XMLSchema" ;
     @Autowired

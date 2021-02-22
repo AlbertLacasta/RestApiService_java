@@ -27,22 +27,12 @@ import java.sql.Statement;
 import java.util.*;
 
 @RestController
-@RequestMapping("/api/flashfind")
-public class FlashFindResource {
+@RequestMapping("/item")
+public class ProductResource {
 
     @Autowired
     JdbcTemplate jdbcTemplate;
 
-    @Operation(summary = "Hello World api endpoint example", description = "This api called hello returns an id from the token that receive")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "successful operation"),
-    })
-    @GetMapping("/hello")
-    public ResponseEntity<String> getHello(@RequestHeader("Authorization") String auth) {
-        Claims decodedToken = __decodeJWT(auth);
-        System.out.println(decodedToken.get("userId"));
-        return new ResponseEntity<>(auth, HttpStatus.OK);
-    }
 
     /****************************************************************/
     /** PRODUCTS                                                   **/
@@ -56,11 +46,11 @@ public class FlashFindResource {
     public ResponseEntity<List<Map<String, Object>>> getProducts() {
         try {
             List<Map<String, Object>> response = jdbcTemplate.queryForList(
-                "SELECT products.product_id, product_title, products.user_owned, favourites.fav_id " +
-                    "FROM products, favourites " +
-                    "WHERE active = true " +
-                    "AND favourites.product_id = products.product_id " +
-                    "ORDER BY date_created DESC"
+                    "SELECT products.product_id, product_title, products.user_owned, favourites.fav_id " +
+                            "FROM products, favourites " +
+                            "WHERE active = true " +
+                            "AND favourites.product_id = products.product_id " +
+                            "ORDER BY date_created DESC"
             );
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch(Exception e) {
@@ -161,15 +151,15 @@ public class FlashFindResource {
             String searchQuery = "%" + product.toUpperCase() + "%";
 
             List<Map<String, Object>> response = jdbcTemplate.queryForList(
-                "SELECT product_id, categories.category_id, categories.category_name, " +
-                        "active, product_title, product_desc, multiscan, products.user_owned, " +
-                        "users.user_username, visit_count, aprox_radius, aprox_latitude, " +
-                        "aprox_longitude, city, zip " +
-                        "FROM products, categories, users " +
-                        "WHERE products.category_id = categories.category_id " +
-                        "AND products.user_owned = users.user_id " +
-                        "AND (UPPER(product_title) LIKE ? " +
-                        "OR UPPER(product_desc) LIKE ?)",
+                    "SELECT product_id, categories.category_id, categories.category_name, " +
+                            "active, product_title, product_desc, multiscan, products.user_owned, " +
+                            "users.user_username, visit_count, aprox_radius, aprox_latitude, " +
+                            "aprox_longitude, city, zip " +
+                            "FROM products, categories, users " +
+                            "WHERE products.category_id = categories.category_id " +
+                            "AND products.user_owned = users.user_id " +
+                            "AND (UPPER(product_title) LIKE ? " +
+                            "OR UPPER(product_desc) LIKE ?)",
                     new Object[]{searchQuery, searchQuery}
             );
             return new ResponseEntity<>(response, HttpStatus.OK);
@@ -196,7 +186,7 @@ public class FlashFindResource {
                             "WHERE product_id = ? " +
                             "AND products.category_id = categories.category_id " +
                             "AND products.user_owned = users.user_id",
-                new Object[]{product_id}
+                    new Object[]{product_id}
             );
 
             int visitCount = (int) response.get("visit_count");
@@ -210,44 +200,6 @@ public class FlashFindResource {
             throw new RuntimeException(e);
         }
     }
-
-    /****************************************************************/
-    /** CATEGORIES                                                 **/
-    /****************************************************************/
-
-    /**
-     *
-     * @return
-     */
-    @GetMapping("/main/categories")
-    public ResponseEntity<List<Map<String, Object>>> getMainCategories() {
-        try {
-            List<Map<String, Object>> response = jdbcTemplate.queryForList(
-                    "SELECT category_id, category_name, category_icon, category_parent_id FROM categories WHERE category_parent_id IS NULL"
-            );
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        } catch(Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * TODO:!!!!!!!!
-     *
-     * @return
-     */
-    @GetMapping("/tree/categories")
-    public ResponseEntity<List<Map<String, Object>>> getCategories() {
-        try {
-            List<Map<String, Object>> response = jdbcTemplate.queryForList(
-            "SELECT category_id, category_name, category_icon, category_parent_id FROM categories"
-            );
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        } catch(Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
 
     /****************************************************************/
     /** PRIVATE FUNCTIONS                                       **/
