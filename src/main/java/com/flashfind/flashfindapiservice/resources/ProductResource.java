@@ -43,12 +43,13 @@ public class ProductResource {
     public ResponseEntity<List<Map<String, Object>>> getProducts() {
         try {
             List<Map<String, Object>> response = jdbcTemplate.queryForList(
-                    "SELECT products.product_id, product_title, products.user_owned, favourites.fav_id " +
-                            "FROM products, favourites " +
-                            "WHERE active = true " +
-                            "AND favourites.product_id = products.product_id " +
-                            "ORDER BY date_created DESC"
+                "SELECT products.product_id, product_title, products.user_owned, favourites.fav_id " +
+                    "FROM products " +
+                    "FULL OUTER JOIN favourites on favourites.product_id = products.product_id " +
+                    "WHERE active = true " +
+                    "ORDER BY date_created DESC"
             );
+
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch(Exception e) {
             throw new RuntimeException(e);
