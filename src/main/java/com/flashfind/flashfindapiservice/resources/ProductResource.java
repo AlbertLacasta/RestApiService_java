@@ -149,15 +149,10 @@ public class ProductResource {
             String searchQuery = "%" + product.toUpperCase() + "%";
 
             List<Map<String, Object>> response = jdbcTemplate.queryForList(
-                    "SELECT product_id, categories.category_id, categories.category_name, " +
-                            "active, product_title, product_desc, multiscan, products.user_owned, " +
-                            "users.user_username, visit_count, aprox_radius, aprox_latitude, " +
-                            "aprox_longitude, city, zip " +
-                            "FROM products, categories, users " +
-                            "WHERE products.category_id = categories.category_id " +
-                            "AND products.user_owned = users.user_id " +
-                            "AND (UPPER(product_title) LIKE ? " +
-                            "OR UPPER(product_desc) LIKE ?)",
+                    "SELECT product_id, product_title " +
+                        "FROM products " +
+                        "WHERE (UPPER(product_title) LIKE ? " +
+                        "OR UPPER(product_desc) LIKE ?)",
                     new Object[]{searchQuery, searchQuery}
             );
             return new ResponseEntity<>(response, HttpStatus.OK);
