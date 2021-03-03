@@ -57,6 +57,30 @@ public class ProductResource {
     }
 
     /**
+     * Return the featured products
+     * MAX(15)
+     * @return
+     */
+    @GetMapping("/feature/products")
+    public ResponseEntity<List<Map<String, Object>>> getFeatureProducts() {
+        try {
+            List<Map<String, Object>> response = jdbcTemplate.queryForList(
+                    "SELECT products.product_id, product_title, products.user_owned, favourites.fav_id "+
+                    "FROM features, products " +
+                    "FULL OUTER JOIN favourites on favourites.product_id = products.product_id " +
+                    "WHERE features.product_id = products.product_id " +
+                    "AND products.active = true " +
+                    "ORDER BY products.date_created DESC " +
+                    "LIMIT 15"
+            );
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
      *
      * @return
      */
