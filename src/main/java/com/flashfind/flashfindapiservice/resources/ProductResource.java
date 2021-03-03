@@ -140,21 +140,26 @@ public class ProductResource {
     }
 
     /**
-     *
+     * Search products
      * @return
      */
     @GetMapping("/search/products/{product}")
-    public ResponseEntity<List<Map<String, Object>>> searchProducts( @PathVariable String product) {
+    public ResponseEntity<List<Map<String, Object>>> searchProducts(
+            @PathVariable String product
+    ) {
         try {
             String searchQuery = "%" + product.toUpperCase() + "%";
 
             List<Map<String, Object>> response = jdbcTemplate.queryForList(
                     "SELECT product_id, product_title " +
                         "FROM products " +
-                        "WHERE (UPPER(product_title) LIKE ? " +
-                        "OR UPPER(product_desc) LIKE ?)",
+                        "WHERE UPPER(product_title) LIKE ? " +
+                        "OR UPPER(product_desc) LIKE ? " +
+                        "ORDER BY product_id DESC " +
+                        "LIMIT 15 ",
                     new Object[]{searchQuery, searchQuery}
             );
+
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch(Exception e) {
             throw new RuntimeException(e);
