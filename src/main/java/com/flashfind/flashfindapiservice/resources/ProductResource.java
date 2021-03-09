@@ -37,17 +37,26 @@ public class ProductResource {
 
     /**
      *
+     * Minimal list of products, it receive a optional parameter for search products that contain a word
      * @return
      */
     @GetMapping("/products")
-    public ResponseEntity<List<Map<String, Object>>> getProducts() {
+    public ResponseEntity<List<Map<String, Object>>> getProducts(@RequestParam(required = false) String query) {
         try {
+            String searchQuery = "%";
+            if (query != null) {
+                searchQuery += query + "%";
+            }
+
             List<Map<String, Object>> response = jdbcTemplate.queryForList(
                 "SELECT products.product_id, product_title, products.user_owned, favourites.fav_id " +
                     "FROM products " +
                     "FULL OUTER JOIN favourites on favourites.product_id = products.product_id " +
                     "WHERE active = true " +
-                    "ORDER BY date_created DESC"
+                    "AND UPPER(product_title) LIKE ? " +
+                    "OR UPPER(product_desc) LIKE ? " +
+                    "ORDER BY date_created DESC",
+                    new Object[]{searchQuery, searchQuery}
             );
 
             return new ResponseEntity<>(response, HttpStatus.OK);
@@ -196,26 +205,28 @@ public class ProductResource {
      */
     @GetMapping("/product/{product_id}")
     public ResponseEntity<Map<String, Object>> getProduct(
-            @PathVariable Integer product_id
+            @PathVariable String product_id
     ) {
         try {
+            int productId = Integer.parseInt(product_id);
+
             Map<String, Object> response = jdbcTemplate.queryForMap(
                     "SELECT product_id, categories.category_id, categories.category_name, " +
                             "active, product_title, product_desc, multiscan, products.user_owned, " +
                             "users.user_username, visit_count, aprox_radius, aprox_latitude, " +
-                            "aprox_longitude, city, zip " +
+                            "aprox_longitude, city, zip, (SELECT count(*) FROM favourites WHERE product_id = products.product_id) favourite_count " +
                             "FROM products, categories, users " +
                             "WHERE product_id = ? " +
                             "AND products.category_id = categories.category_id " +
                             "AND products.user_owned = users.user_id",
-                    new Object[]{product_id}
+                    new Object[]{productId}
             );
 
             int visitCount = (int) response.get("visit_count");
 
             jdbcTemplate.update(
                     "UPDATE products SET visit_count = ? WHERE product_id = ?",
-                    visitCount+1, product_id);
+                    visitCount+1, productId);
 
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch(Exception e) {
