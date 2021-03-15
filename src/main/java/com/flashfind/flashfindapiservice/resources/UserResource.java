@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -61,27 +62,39 @@ public class UserResource {
         JSONObject json     = new JSONObject(userMap);
         String email        = json.getString("email");
         String password     = json.getString("password");
+
         if(email != null) {
             email.toLowerCase();
         }
 
-        Map<String, Object> user = jdbcTemplate.queryForObject(
-        "SELECT USER_ID, USER_EMAIL, USER_PASSWORD, USER_USERNAME FROM USERS WHERE USER_EMAIL = ?",
-            new Object[]{email}, userRowMapped
-        );
+        try {
+            Map<String, Object> user = jdbcTemplate.queryForObject(
+                    "SELECT USER_ID, USER_EMAIL, USER_PASSWORD, USER_USERNAME FROM USERS WHERE USER_EMAIL = ?",
+                    new Object[]{email}, userRowMapped
+            );
 
-        // TODO: make in client side
-        if(!password.equals(user.get("password"))) {
-            throw new Exception("Invalid email/password.");
+            if (!password.equals(user.get("password"))) {
+                Map<String, String> response = new HashMap<>();
+                response.put("message", "Invalid password");
+                response.put("fromPassword", "1");
+                return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+            }
+
+            Map<String, String> tokenMap = __generateJWTToken(
+                    (Integer) user.get("user_id"),
+                    (String) user.get("email"),
+                    (String) user.get("username")
+            );
+
+            return new ResponseEntity<>(tokenMap, HttpStatus.OK);
+
+        } catch (EmptyResultDataAccessException e) {
+            // Fix Spring error when response of the select don't returns any row
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Invalid email");
+            response.put("fromPassword", "0");
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
-
-        Map<String, String> tokenMap = __generateJWTToken(
-            (Integer) user.get("user_id"),
-            (String) user.get("email"),
-            (String) user.get("username")
-        );
-
-        return new ResponseEntity<>(tokenMap, HttpStatus.OK);
     }
 
     /**
