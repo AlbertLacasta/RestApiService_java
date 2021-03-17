@@ -94,11 +94,14 @@ public class ProductResource {
      * @return
      */
     @PostMapping("/product")
-    public ResponseEntity<String> createProduct(@RequestHeader("Authorization") String auth,  @RequestBody String userMap) {
+    public ResponseEntity<Map<String, Number>> createProduct(
+            @RequestHeader("Authorization") String auth,
+            @RequestBody String data
+    ) {
         try {
             Claims decodedToken = __decodeJWT(auth);
 
-            JSONObject json         = new JSONObject(userMap);
+            JSONObject json         = new JSONObject(data);
 
             // PRODUCT
             String product_title    = json.getString("product_title");
@@ -107,7 +110,7 @@ public class ProductResource {
             int category_id         = json.getInt("category_id");
             int user_owned          = (int) decodedToken.get("userId");
             int user_created        = (int) decodedToken.get("userId");
-            Date date_created       = new Date();
+            java.sql.Date date_created       = (java.sql.Date) new Date();
 
             // LOCATION
             String city             = json.getString("city");
@@ -120,13 +123,56 @@ public class ProductResource {
             String qr_data          = json.getString("qr_data");
             byte[] qrByte           = QRCode.generateQR(qr_data);
 
-            // TODO !!!!! ADD QR
-            jdbcTemplate.update(
+            // TODO: Add qrData
+            KeyHolder keyHolder = new GeneratedKeyHolder();
+            jdbcTemplate.update(connection -> {
+                PreparedStatement ps = connection.prepareStatement(
                     "INSERT INTO products(product_title, product_desc, multiscan, category_id, user_owned, " +
-                            "user_created, date_created, city, zip, aprox_radius, aprox_latitude, aprox_longitude) " +
-                            "VALUES(?, ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?)",
-                    product_title, product_desc, multiscan, category_id, user_owned, user_created, date_created, city,
-                    zip, aprox_radius, aprox_latitude, aprox_longitude
+                        "user_created, date_created, city, zip, aprox_radius, aprox_latitude, aprox_longitude) " +
+                        "VALUES(?, ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?)",
+                        Statement.RETURN_GENERATED_KEYS
+                );
+                ps.setString(1,product_title);
+                ps.setString(2,product_desc);
+                ps.setBoolean(3,multiscan);
+                ps.setInt(4,category_id);
+                ps.setInt(5,user_owned);
+                ps.setInt(6,user_created);
+                ps.setDate(7,date_created);
+                ps.setString(8,city);
+                ps.setInt(9,zip);
+                ps.setInt(10,aprox_radius);
+                ps.setInt(11,aprox_latitude);
+                ps.setInt(12,aprox_longitude);
+
+                return ps;
+            }, keyHolder);
+
+            Map<String, Number> response = new HashMap<>();
+            response.put("product_id", keyHolder.getKey());
+            return new ResponseEntity<>(response,HttpStatus.OK);
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     *
+     * @return
+     */
+    @PostMapping("/product/{product_id}/image")
+    public ResponseEntity<String> createProduct(
+            @RequestBody String data,
+            @PathVariable int product_id
+    ) {
+        try {
+            JSONObject json         = new JSONObject(data);
+            String imageData        = json.getString("image_data");
+            System.out.println("image_data" + imageData);
+
+            jdbcTemplate.update(
+                "INSERT INTO pictures_product(product_id, picture_data) VALUES(?, ?)",
+                    product_id, imageData
             );
 
             return new ResponseEntity<>(HttpStatus.OK);

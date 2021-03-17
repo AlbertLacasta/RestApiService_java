@@ -49,7 +49,7 @@ public class CategoryResource {
     public ResponseEntity<List<Map<String, Object>>> getCategories() {
         try {
             List<Map<String, Object>> response = jdbcTemplate.queryForList(
-            "SELECT category_id, category_name, category_icon, category_parent_id FROM categories"
+            "SELECT category_id, category_name, category_icon, category_parent_id FROM categories "
             );
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch(Exception e) {
