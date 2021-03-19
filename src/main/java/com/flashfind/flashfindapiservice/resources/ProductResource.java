@@ -7,7 +7,9 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
+import java.io.UnsupportedEncodingException;
 import java.security.Key;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -110,7 +113,6 @@ public class ProductResource {
             int category_id         = json.getInt("category_id");
             int user_owned          = (int) decodedToken.get("userId");
             int user_created        = (int) decodedToken.get("userId");
-            java.sql.Date date_created       = (java.sql.Date) new Date();
 
             // LOCATION
             String city             = json.getString("city");
@@ -127,9 +129,9 @@ public class ProductResource {
             KeyHolder keyHolder = new GeneratedKeyHolder();
             jdbcTemplate.update(connection -> {
                 PreparedStatement ps = connection.prepareStatement(
-                    "INSERT INTO products(product_title, product_desc, multiscan, category_id, user_owned, " +
-                        "user_created, date_created, city, zip, aprox_radius, aprox_latitude, aprox_longitude) " +
-                        "VALUES(?, ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?)",
+                    "INSERT INTO products(date_created, product_title, product_desc, multiscan, category_id, user_owned, " +
+                        "user_created, city, zip, aprox_radius, aprox_latitude, aprox_longitude) " +
+                        "VALUES(CURRENT_DATE, ?, ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?)",
                         Statement.RETURN_GENERATED_KEYS
                 );
                 ps.setString(1,product_title);
@@ -138,18 +140,17 @@ public class ProductResource {
                 ps.setInt(4,category_id);
                 ps.setInt(5,user_owned);
                 ps.setInt(6,user_created);
-                ps.setDate(7,date_created);
-                ps.setString(8,city);
-                ps.setInt(9,zip);
-                ps.setInt(10,aprox_radius);
-                ps.setInt(11,aprox_latitude);
-                ps.setInt(12,aprox_longitude);
+                ps.setString(7,city);
+                ps.setInt(8,zip);
+                ps.setInt(9,aprox_radius);
+                ps.setInt(10,aprox_latitude);
+                ps.setInt(11,aprox_longitude);
 
                 return ps;
             }, keyHolder);
 
             Map<String, Number> response = new HashMap<>();
-            response.put("product_id", keyHolder.getKey());
+            response.put("product_id", (Number) keyHolder.getKeys().get("product_id"));
             return new ResponseEntity<>(response,HttpStatus.OK);
         } catch(Exception e) {
             throw new RuntimeException(e);
@@ -160,6 +161,37 @@ public class ProductResource {
      *
      * @return
      */
+    @GetMapping("/product/{product_id}/image")
+    public ResponseEntity<byte[]> getProductImage(
+        @PathVariable int product_id
+    ) {
+        try {
+            Map<String, Object> response = jdbcTemplate.queryForMap(
+                "SELECT picture_data FROM pictures_product " +
+                    "WHERE product_id = ? " +
+                    "LIMIT 1 ",
+                    new Object[]{product_id}
+            );
+
+            byte[] decodedString = Base64.getDecoder().decode(response.get("picture_data").toString().getBytes("UTF-8"));
+            System.out.println("decodedString: " + decodedString.toString());
+
+            return ResponseEntity
+                    .ok()
+                    .contentType(MediaType.IMAGE_JPEG)
+                    .body(decodedString);
+        } catch (EmptyResultDataAccessException e) {
+            System.out.println("no image for pooduct " + product_id );
+        } catch(UnsupportedEncodingException e) {
+            System.out.println("UnsupportedEncodingException " + e.getMessage() );
+        }
+
+        return ResponseEntity
+                .ok()
+                .contentType(MediaType.IMAGE_JPEG)
+                .body("xxx".getBytes());
+    }
+
     @PostMapping("/product/{product_id}/image")
     public ResponseEntity<String> createProduct(
             @RequestBody String data,
@@ -168,10 +200,8 @@ public class ProductResource {
         try {
             JSONObject json         = new JSONObject(data);
             String imageData        = json.getString("image_data");
-            System.out.println("image_data" + imageData);
-
             jdbcTemplate.update(
-                "INSERT INTO pictures_product(product_id, picture_data) VALUES(?, ?)",
+                    "INSERT INTO pictures_product(product_id, picture_data) VALUES(?, ?)",
                     product_id, imageData
             );
 
