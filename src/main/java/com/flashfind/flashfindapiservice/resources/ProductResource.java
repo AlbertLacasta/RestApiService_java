@@ -92,6 +92,66 @@ public class ProductResource {
         }
     }
 
+    // TODO; move to userResources with path user/{user_id}/products/favourite
+    @GetMapping("/products/user/{user_id}/favourites")
+    public ResponseEntity<List<Map<String, Object>>> getFavouriteProductsByUser(@PathVariable int user_id) {
+        try {
+            List<Map<String, Object>> response = jdbcTemplate.queryForList(
+                    "SELECT products.product_id, product_title, products.user_owned, favourites.fav_id " +
+                        "FROM products " +
+                        "FULL OUTER JOIN favourites on favourites.product_id = products.product_id " +
+                        "WHERE active = true " +
+                        "AND favourites.user_id = ? " +
+                        "ORDER BY date_created DESC",
+                    new Object[]{user_id, user_id}
+            );
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // TODO; move to userResources with path user/{user_id}/products/favourite
+    @GetMapping("/products/user/{user_id}/scanned")
+    public ResponseEntity<List<Map<String, Object>>> getScannedProductsByUser(@PathVariable int user_id) {
+        try {
+            List<Map<String, Object>> response = jdbcTemplate.queryForList(
+                    "SELECT products.product_id, product_title, products.user_owned, favourites.fav_id " +
+                            "FROM products " +
+                            "FULL OUTER JOIN favourites on favourites.product_id = products.product_id " +
+                            "FULL OUTER JOIN scanned on scanned.product_id = products.product_id " +
+                            "WHERE active = true " +
+                            "AND favourites.user_id = ? " +
+                            "ORDER BY date_created DESC",
+                    new Object[]{user_id, user_id}
+            );
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @GetMapping("/products/user/{user_id}")
+    public ResponseEntity<List<Map<String, Object>>> getProductsByUser(@PathVariable int user_id) {
+        try {
+            List<Map<String, Object>> response = jdbcTemplate.queryForList(
+                    "SELECT products.product_id, product_title, products.user_owned, favourites.fav_id " +
+                            "FROM products " +
+                            "FULL OUTER JOIN favourites on favourites.product_id = products.product_id " +
+                            "WHERE active = true " +
+                            "AND products.user_owned = ? " +
+                            "ORDER BY date_created DESC",
+                    new Object[]{user_id}
+            );
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     /**
      *
      * @return
