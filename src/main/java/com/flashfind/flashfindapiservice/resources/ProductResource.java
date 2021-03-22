@@ -122,9 +122,9 @@ public class ProductResource {
                             "FULL OUTER JOIN favourites on favourites.product_id = products.product_id " +
                             "FULL OUTER JOIN scanned on scanned.product_id = products.product_id " +
                             "WHERE active = true " +
-                    "AND favourites.user_id = ? " +
+                            "AND scanned.user_id = ? " +
                             "ORDER BY date_created DESC",
-                    new Object[]{user_id, user_id}
+                    new Object[]{user_id}
             );
 
             return new ResponseEntity<>(response, HttpStatus.OK);
