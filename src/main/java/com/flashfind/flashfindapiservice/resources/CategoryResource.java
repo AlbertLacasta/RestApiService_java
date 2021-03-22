@@ -32,7 +32,7 @@ public class CategoryResource {
     public ResponseEntity<List<Map<String, Object>>> getMainCategories() {
         try {
             List<Map<String, Object>> response = jdbcTemplate.queryForList(
-                    "SELECT category_id, category_name, category_icon, category_parent_id FROM categories WHERE category_parent_id IS NULL"
+                    "SELECT category_id, category_name, category_icon, category_color, category_parent_id FROM categories WHERE category_parent_id IS NULL ORDER BY category_name"
             );
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch(Exception e) {

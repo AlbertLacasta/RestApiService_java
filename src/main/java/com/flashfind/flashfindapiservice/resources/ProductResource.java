@@ -222,9 +222,10 @@ public class ProductResource {
      * @return
      */
     @GetMapping("/product/{product_id}/image")
-    public ResponseEntity<byte[]> getProductImage(
+    public ResponseEntity<Map<String, String>> getProductImage(
         @PathVariable int product_id
     ) {
+        Map<String, String> responseMap = new HashMap<>();
         try {
             Map<String, Object> response = jdbcTemplate.queryForMap(
                 "SELECT picture_data FROM pictures_product " +
@@ -233,23 +234,13 @@ public class ProductResource {
                     new Object[]{product_id}
             );
 
-            byte[] decodedString = Base64.getDecoder().decode(response.get("picture_data").toString().getBytes("UTF-8"));
-            System.out.println("decodedString: " + decodedString.toString());
-
-            return ResponseEntity
-                    .ok()
-                    .contentType(MediaType.IMAGE_JPEG)
-                    .body(decodedString);
+            responseMap.put("picture_data",  response.get("picture_data").toString());
+            return new ResponseEntity<>(responseMap,HttpStatus.OK);
         } catch (EmptyResultDataAccessException e) {
-            System.out.println("no image for pooduct " + product_id );
-        } catch(UnsupportedEncodingException e) {
-            System.out.println("UnsupportedEncodingException " + e.getMessage() );
+            System.out.println("no image for product " + product_id );
+            responseMap.put("picture_data", null);
+            return new ResponseEntity<>(responseMap,HttpStatus.OK);
         }
-
-        return ResponseEntity
-                .ok()
-                .contentType(MediaType.IMAGE_JPEG)
-                .body("xxx".getBytes());
     }
 
     @PostMapping("/product/{product_id}/image")
