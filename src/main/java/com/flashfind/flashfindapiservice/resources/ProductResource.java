@@ -237,7 +237,6 @@ public class ProductResource {
             responseMap.put("picture_data",  response.get("picture_data").toString());
             return new ResponseEntity<>(responseMap,HttpStatus.OK);
         } catch (EmptyResultDataAccessException e) {
-            System.out.println("no image for product " + product_id );
             responseMap.put("picture_data", null);
             return new ResponseEntity<>(responseMap,HttpStatus.OK);
         }
