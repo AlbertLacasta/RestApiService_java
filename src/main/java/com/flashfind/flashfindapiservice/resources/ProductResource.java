@@ -178,8 +178,8 @@ public class ProductResource {
             String city             = json.getString("city");
             int zip                 = json.getInt("zip");
             int aprox_radius        = json.getInt("aprox_radius");
-            double aprox_latitude      = json.getInt("aprox_latitude");
-            double aprox_longitude     = json.getInt("aprox_longitude");
+            double aprox_latitude      = json.getDouble("aprox_latitude");
+            double aprox_longitude     = json.getDouble("aprox_longitude");
 
             // QR
             String qr_data          = json.getString("qr_data");
@@ -203,8 +203,8 @@ public class ProductResource {
                 ps.setString(7,city);
                 ps.setInt(8,zip);
                 ps.setInt(9,aprox_radius);
-                ps.setInt(10,aprox_latitude);
-                ps.setInt(11,aprox_longitude);
+                ps.setDouble(10,aprox_latitude);
+                ps.setDouble(11,aprox_longitude);
 
                 return ps;
             }, keyHolder);
