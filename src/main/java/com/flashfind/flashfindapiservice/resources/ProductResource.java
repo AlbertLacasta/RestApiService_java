@@ -178,8 +178,8 @@ public class ProductResource {
             String city             = json.getString("city");
             int zip                 = json.getInt("zip");
             int aprox_radius        = json.getInt("aprox_radius");
-            int aprox_latitude      = json.getInt("aprox_latitude");
-            int aprox_longitude     = json.getInt("aprox_longitude");
+            double aprox_latitude      = json.getInt("aprox_latitude");
+            double aprox_longitude     = json.getInt("aprox_longitude");
 
             // QR
             String qr_data          = json.getString("qr_data");
