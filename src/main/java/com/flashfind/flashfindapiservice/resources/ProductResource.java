@@ -52,7 +52,8 @@ public class ProductResource {
             }
 
             List<Map<String, Object>> response = jdbcTemplate.queryForList(
-                "SELECT products.product_id, product_title, products.user_owned, favourites.fav_id " +
+                "SELECT products.product_id, product_title, products.user_owned, favourites.fav_id, " +
+                    "(SELECT picture_data FROM pictures_product WHERE pictures_product.product_id = product_id LIMIT 1 ) picture_data " +
                     "FROM products " +
                     "FULL OUTER JOIN favourites on favourites.product_id = products.product_id " +
                     "WHERE active = true " +
@@ -77,7 +78,8 @@ public class ProductResource {
     public ResponseEntity<List<Map<String, Object>>> getFeatureProducts() {
         try {
             List<Map<String, Object>> response = jdbcTemplate.queryForList(
-                    "SELECT products.product_id, product_title, products.user_owned, favourites.fav_id "+
+                "SELECT products.product_id, product_title, products.user_owned, favourites.fav_id, "+
+                    "(SELECT picture_data FROM pictures_product WHERE pictures_product.product_id = product_id LIMIT 1 ) picture_data " +
                     "FROM features, products " +
                     "FULL OUTER JOIN favourites on favourites.product_id = products.product_id " +
                     "WHERE features.product_id = products.product_id " +
