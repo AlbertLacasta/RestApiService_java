@@ -9,7 +9,6 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
-import java.io.UnsupportedEncodingException;
 import java.security.Key;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -32,7 +30,6 @@ public class ProductResource {
 
     @Autowired
     JdbcTemplate jdbcTemplate;
-
 
     /****************************************************************/
     /** PRODUCTS                                                   **/
@@ -185,15 +182,15 @@ public class ProductResource {
 
             // QR
             String qr_data          = json.getString("qr_data");
-            byte[] qrByte           = QRCode.generateQR(qr_data);
+            String qrBase64           = QRCode.byteArr2Base64(QRCode.generateQR(qr_data));
 
             // TODO: Add qrData
             KeyHolder keyHolder = new GeneratedKeyHolder();
             jdbcTemplate.update(connection -> {
                 PreparedStatement ps = connection.prepareStatement(
                     "INSERT INTO products(date_created, product_title, product_desc, multiscan, category_id, user_owned, " +
-                        "user_created, city, zip, aprox_radius, aprox_latitude, aprox_longitude) " +
-                        "VALUES(CURRENT_DATE, ?, ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?)",
+                        "user_created, city, zip, aprox_radius, aprox_latitude, aprox_longitude, qr_code) " +
+                        "VALUES(CURRENT_DATE, ?, ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?, ?)",
                         Statement.RETURN_GENERATED_KEYS
                 );
                 ps.setString(1,product_title);
@@ -207,6 +204,7 @@ public class ProductResource {
                 ps.setInt(9,aprox_radius);
                 ps.setDouble(10,aprox_latitude);
                 ps.setDouble(11,aprox_longitude);
+                ps.setString(12,qrBase64);
 
                 return ps;
             }, keyHolder);
@@ -342,7 +340,7 @@ public class ProductResource {
                     "SELECT product_id, categories.category_id, categories.category_name, " +
                             "active, product_title, product_desc, multiscan, products.user_owned, " +
                             "users.user_username, visit_count, aprox_radius, aprox_latitude, " +
-                            "aprox_longitude, city, zip, (SELECT count(*) FROM favourites WHERE product_id = products.product_id) favourite_count " +
+                            "aprox_longitude, city, zip, qr_code, (SELECT count(*) FROM favourites WHERE product_id = products.product_id) favourite_count " +
                             "FROM products, categories, users " +
                             "WHERE product_id = ? " +
                             "AND products.category_id = categories.category_id " +

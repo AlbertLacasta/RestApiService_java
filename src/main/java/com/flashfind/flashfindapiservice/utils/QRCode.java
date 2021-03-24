@@ -16,6 +16,7 @@ import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.QRCodeReader;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+import org.springframework.util.Base64Utils;
 
 import javax.imageio.ImageIO;
 import javax.sql.rowset.serial.SerialBlob;
@@ -26,13 +27,13 @@ public class QRCode {
      * Generate QR Code and returns in Base64
      *
      * @param qrCodeText
-     * @param name
      * @return
      * @throws WriterException
      * @throws IOException
      */
     public static byte[] generateQR(String qrCodeText)
-            throws WriterException, IOException {
+            throws WriterException, IOException
+    {
         int size = 225;
 
         // Create the ByteMatrix for the QR-Code that encodes the given String
@@ -53,8 +54,44 @@ public class QRCode {
      * @return
      * @throws IOException
      */
+    public static String readRQ(byte[] bytes) throws IOException {
+        BufferedImage image = ImageIO.read(byteArr2ImputStream(bytes));
+        LuminanceSource source = new BufferedImageLuminanceSource(image);
+        BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
+        QRCodeReader reader = new QRCodeReader();
+        Result result = null;
+
+        try {
+            result = reader.decode(bitmap);
+        } catch (ReaderException e) {
+            e.printStackTrace();
+        }
+
+        return result.getText();
+    }
+
+    /***************************************************************/
+    /** QR Converter                                              **/
+    /***************************************************************/
+
+    /**
+     *
+     * @param bytes
+     * @return
+     * @throws IOException
+     */
     public static BufferedImage byteArr2Image(byte[] bytes) throws IOException {
        return ImageIO.read(new ByteArrayInputStream(bytes));
+    }
+
+    /**
+     *
+     * @param bytes
+     * @return
+     * @throws IOException
+     */
+    public static String byteArr2Base64(byte[] bytes) {
+        return Base64Utils.encodeToString(bytes);
     }
 
     /**
@@ -76,29 +113,5 @@ public class QRCode {
     public static SerialBlob byteArr2Blob(byte[] bytes) throws SQLException {
        return new SerialBlob(bytes);
     }
-
-    /**
-     *
-     * @param bytes
-     * @return
-     * @throws IOException
-     */
-    public static String readRQ(byte[] bytes) throws IOException {
-
-        BufferedImage image = ImageIO.read(byteArr2ImputStream(bytes));
-        LuminanceSource source = new BufferedImageLuminanceSource(image);
-        BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
-        QRCodeReader reader = new QRCodeReader();
-        Result result = null;
-
-        try {
-            result = reader.decode(bitmap);
-        } catch (ReaderException e) {
-            e.printStackTrace();
-        }
-
-        return result.getText();
-    }
-
 
 }
