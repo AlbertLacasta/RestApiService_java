@@ -49,7 +49,7 @@ public class ProductResource {
             }
 
             List<Map<String, Object>> response = jdbcTemplate.queryForList(
-                "SELECT products.product_id, product_title, products.user_owned, favourites.fav_id, " +
+                "SELECT products.product_id, product_title, products.user_owned, favourites.fav_id IS NOT NULL, " +
                     "(SELECT picture_data FROM pictures_product WHERE pictures_product.product_id = products.product_id LIMIT 1 ) picture_data " +
                     "FROM products " +
                     "FULL OUTER JOIN favourites on favourites.product_id = products.product_id " +
@@ -93,9 +93,14 @@ public class ProductResource {
     }
 
     // TODO; move to userResources with path user/{user_id}/products/favourite
-    @GetMapping("/products/user/{user_id}/favourites")
-    public ResponseEntity<List<Map<String, Object>>> getFavouriteProductsByUser(@PathVariable int user_id) {
+    @GetMapping("/products/user/favourites")
+    public ResponseEntity<List<Map<String, Object>>> getFavouriteProductsByUser(
+            @RequestHeader("Authorization") String auth
+    ) {
         try {
+            // Get user id from token
+            Claims decodedToken     = __decodeJWT(auth);
+            int user_id             = (int) decodedToken.get("userId");
             List<Map<String, Object>> response = jdbcTemplate.queryForList(
                     "SELECT products.product_id, product_title, products.user_owned, favourites.fav_id, " +
                         "(SELECT picture_data FROM pictures_product WHERE pictures_product.product_id = products.product_id LIMIT 1 ) picture_data " +
@@ -114,9 +119,15 @@ public class ProductResource {
     }
 
     // TODO; move to userResources with path user/{user_id}/products/favourite
-    @GetMapping("/products/user/{user_id}/scanned")
-    public ResponseEntity<List<Map<String, Object>>> getScannedProductsByUser(@PathVariable int user_id) {
+    @GetMapping("/products/user/scanned")
+    public ResponseEntity<List<Map<String, Object>>> getScannedProductsByUser(
+            @RequestHeader("Authorization") String auth
+    ) {
         try {
+            // Get user id from token
+            Claims decodedToken     = __decodeJWT(auth);
+            int user_id             = (int) decodedToken.get("userId");
+
             List<Map<String, Object>> response = jdbcTemplate.queryForList(
                         "SELECT products.product_id, product_title, products.user_owned, favourites.fav_id, " +
                             "(SELECT picture_data FROM pictures_product WHERE pictures_product.product_id = products.product_id LIMIT 1 ) picture_data " +
@@ -135,9 +146,15 @@ public class ProductResource {
         }
     }
 
-    @GetMapping("/products/user/{user_id}")
-    public ResponseEntity<List<Map<String, Object>>> getProductsByUser(@PathVariable int user_id) {
+    @GetMapping("/products/user")
+    public ResponseEntity<List<Map<String, Object>>> getProductsByUser(
+            @RequestHeader("Authorization") String auth
+    ) {
         try {
+            // Get user id from token
+            Claims decodedToken     = __decodeJWT(auth);
+            int user_id             = (int) decodedToken.get("userId");
+
             List<Map<String, Object>> response = jdbcTemplate.queryForList(
                     "SELECT products.product_id, product_title, products.user_owned, favourites.fav_id, " +
                             "(SELECT picture_data FROM pictures_product WHERE pictures_product.product_id = products.product_id LIMIT 1 ) picture_data " +
