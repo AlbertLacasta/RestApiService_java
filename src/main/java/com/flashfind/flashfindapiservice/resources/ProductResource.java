@@ -335,21 +335,28 @@ public class ProductResource {
      */
     @GetMapping("/product/{product_id}")
     public ResponseEntity<Map<String, Object>> getProduct(
+            @RequestHeader("Authorization") String auth,
             @PathVariable String product_id
     ) {
         try {
+            // Get user id from token
+            Claims decodedToken     = __decodeJWT(auth);
+            int user_id             = (int) decodedToken.get("userId");
+
             int productId = Integer.parseInt(product_id);
 
             Map<String, Object> response = jdbcTemplate.queryForMap(
                     "SELECT product_id, categories.category_id, categories.category_name, " +
-                            "active, product_title, product_desc, multiscan, products.user_owned, " +
-                            "users.user_username, visit_count, aprox_radius, aprox_latitude, " +
-                            "aprox_longitude, city, zip, qr_code, (SELECT count(*) FROM favourites WHERE product_id = products.product_id) favourite_count " +
-                            "FROM products, categories, users " +
-                            "WHERE product_id = ? " +
-                            "AND products.category_id = categories.category_id " +
-                            "AND products.user_owned = users.user_id",
-                    new Object[]{productId}
+                        "active, product_title, product_desc, multiscan, products.user_owned, " +
+                        "users.user_username, visit_count, aprox_radius, aprox_latitude, " +
+                        "aprox_longitude, city, zip, qr_code, " +
+                        "(SELECT count(*) FROM favourites WHERE product_id = products.product_id) favourite_count, " +
+                        "(SELECT count(*) >= 1 FROM scanned WHERE scanned.product_id = products.product_id AND scanned.user_id = ? ) scanned " +
+                        "FROM products, categories, users " +
+                        "WHERE product_id = ? " +
+                        "AND products.category_id = categories.category_id " +
+                        "AND products.user_owned = users.user_id",
+                    new Object[]{user_id, productId}
             );
 
             int visitCount = (int) response.get("visit_count");
