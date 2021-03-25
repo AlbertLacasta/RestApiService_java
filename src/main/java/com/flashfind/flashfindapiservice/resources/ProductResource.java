@@ -54,7 +54,7 @@ public class ProductResource {
                     "FROM products " +
                     "FULL OUTER JOIN favourites on favourites.product_id = products.product_id " +
                     "WHERE active = true " +
-                    "AND product_id NOT IN (SELECT distinct sc.product_id FROM scanned sc WHERE pr.product_id = sc.product_id AND pr.multiscan = false ) " +
+                    "AND products.product_id NOT IN (SELECT distinct sc.product_id FROM scanned sc WHERE products.product_id = sc.product_id AND products.multiscan = false ) " +
                     "AND UPPER(product_title) LIKE ? " +
                     "OR UPPER(product_desc) LIKE ? " +
                     "ORDER BY date_created DESC",
