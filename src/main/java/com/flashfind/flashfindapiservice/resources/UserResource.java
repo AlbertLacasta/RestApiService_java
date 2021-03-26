@@ -39,7 +39,10 @@ public class UserResource {
             int user_id             = (int) decodedToken.get("userId");
 
             Map<String, Object> response = jdbcTemplate.queryForMap(
-                    "SELECT user_email, user_username, user_firstname, user_lastname, user_refister_date, user_picture " +
+                    "SELECT user_email, user_username, user_firstname, user_lastname, user_register_date, user_picture, " +
+                        "(SELECT count(*) FROM favourites WHERE favourites.user_id = users.user_id) favourite_count, " +
+                        "(SELECT count(*) FROM scanned WHERE scanned.user_id = users.user_id) scanned_count, " +
+                        "(SELECT count(*) FROM products WHERE products.user_owned = users.user_id) products_count " +
                         "FROM users WHERE user_id = ?",
                     new Object[]{user_id}
             );
