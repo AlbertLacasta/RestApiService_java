@@ -4,7 +4,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.filter.GenericFilterBean;
-import com.flashfind.flashfindapiservice.Constants;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;

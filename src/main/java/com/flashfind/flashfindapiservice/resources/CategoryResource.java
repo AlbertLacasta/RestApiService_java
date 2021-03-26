@@ -57,56 +57,9 @@ public class CategoryResource {
         }
     }
 
-
     /****************************************************************/
     /** PRIVATE FUNCTIONS                                       **/
     /****************************************************************/
-
-    /**
-     * Map the ResultSet to Map Array
-     * IMPORTANT!!! The ResultSet is closed by the jdbcTemplate after the RowMapper
-     *
-     * @param rs
-     * @param rowNum
-     * @return
-     * @throws SQLException
-     */
-    private List<Map<String, Object>> __resultSet2MapArray(ResultSet rs, int rowNum)
-            throws SQLException
-    {
-        List<Map<String, Object>> mapArray = new ArrayList<>();
-
-        while (rs.next()) {
-            Map<String, Object> rsMap = new HashMap<>();
-            for (int col = 1; col <= rs.getMetaData().getColumnCount(); col++) {
-                rsMap.put(rs.getMetaData().getColumnName(col), rs.getObject(col));
-            }
-
-            mapArray.add(rsMap);
-        }
-
-        return mapArray;
-    }
-
-    /**
-     * Map the ResultSet to Map
-     * IMPORTANT!!! The ResultSet is closed by the jdbcTemplate after the RowMapper
-     *
-     * @param rs
-     * @param rowNum
-     * @return
-     * @throws SQLException
-     */
-    private Map<String, Object> __resultSet2Map(ResultSet rs, int rowNum)
-            throws SQLException
-    {
-        Map<String, Object> rsMap = new HashMap<>();
-        for (int col = 1; col <= rs.getMetaData().getColumnCount(); col++) {
-            rsMap.put(rs.getMetaData().getColumnName(col), rs.getObject(col));
-        }
-        return rsMap;
-    }
-
 
     /**
      *

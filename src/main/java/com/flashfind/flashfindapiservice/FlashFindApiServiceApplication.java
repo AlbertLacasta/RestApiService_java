@@ -23,6 +23,7 @@ public class FlashFindApiServiceApplication {
         // Protected api's that has to receive a token to return a response
         registrationBean.addUrlPatterns("/category/*");
         registrationBean.addUrlPatterns("/item/*");
+        registrationBean.addUrlPatterns("/users/*");
 
         return registrationBean;
     }

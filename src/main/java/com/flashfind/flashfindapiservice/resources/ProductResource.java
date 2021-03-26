@@ -19,8 +19,6 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 import java.security.Key;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
 
@@ -319,6 +317,28 @@ public class ProductResource {
         }
     }
 
+    // TODO; move to userResources with path user/{user_id}/products/favourite
+    @DeleteMapping("/product/{product_id}/wishlist")
+    public ResponseEntity<Integer> removeFromWishlist(
+            @RequestHeader("Authorization") String auth,
+            @PathVariable int product_id
+    ) {
+        try {
+            // Get user id from token
+            Claims decodedToken     = __decodeJWT(auth);
+            int user_id             = (int) decodedToken.get("userId");
+
+            jdbcTemplate.update(
+                    "DELETE FROM favourites WHERE product_id = ? AND user_id = ?",
+                    product_id, user_id
+            );
+
+            return new ResponseEntity<>(1, HttpStatus.OK);
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     /**
      * Search products
      * @return
@@ -363,17 +383,18 @@ public class ProductResource {
             int productId = Integer.parseInt(product_id);
 
             Map<String, Object> response = jdbcTemplate.queryForMap(
-                    "SELECT product_id, categories.category_id, categories.category_name, " +
-                        "active, product_title, product_desc, multiscan, products.user_owned, " +
-                        "users.user_username, visit_count, aprox_radius, aprox_latitude, " +
-                        "aprox_longitude, city, zip, qr_code, " +
-                        "(SELECT count(*) FROM favourites WHERE product_id = products.product_id) favourite_count, " +
-                        "(SELECT count(*) >= 1 FROM scanned WHERE scanned.product_id = products.product_id AND scanned.user_id = ? ) scanned " +
-                        "FROM products, categories, users " +
-                        "WHERE product_id = ? " +
-                        "AND products.category_id = categories.category_id " +
-                        "AND products.user_owned = users.user_id",
-                    new Object[]{user_id, productId}
+                    "SELECT products.product_id, categories.category_id, categories.category_name, " +
+                            "active, product_title, product_desc, multiscan, products.user_owned, " +
+                            "users.user_username, visit_count, aprox_radius, aprox_latitude, " +
+                            "aprox_longitude, city, zip, qr_code, favourites.fav_id IS NOT NULL as is_favourite, " +
+                            "(SELECT count(*) FROM favourites WHERE product_id = products.product_id) favourite_count, " +
+                            "(SELECT count(*) >= 1 FROM scanned WHERE scanned.product_id = products.product_id AND scanned.user_id = ?) scanned " +
+                            "FROM products, categories, users " +
+                            "FULL OUTER JOIN favourites on favourites.product_id = ? " +
+                            "WHERE products.product_id = ? " +
+                            "AND products.category_id = categories.category_id " +
+                            "AND products.user_owned = users.user_id",
+                    new Object[]{user_id, productId, productId}
             );
 
             int visitCount = (int) response.get("visit_count");
@@ -389,54 +410,8 @@ public class ProductResource {
     }
 
     /****************************************************************/
-    /** PRIVATE FUNCTIONS                                       **/
+    /** PRIVATE FUNCTIONS                                          **/
     /****************************************************************/
-
-    /**
-     * Map the ResultSet to Map Array
-     * IMPORTANT!!! The ResultSet is closed by the jdbcTemplate after the RowMapper
-     *
-     * @param rs
-     * @param rowNum
-     * @return
-     * @throws SQLException
-     */
-    private List<Map<String, Object>> __resultSet2MapArray(ResultSet rs, int rowNum)
-            throws SQLException
-    {
-        List<Map<String, Object>> mapArray = new ArrayList<>();
-
-        while (rs.next()) {
-            Map<String, Object> rsMap = new HashMap<>();
-            for (int col = 1; col <= rs.getMetaData().getColumnCount(); col++) {
-                rsMap.put(rs.getMetaData().getColumnName(col), rs.getObject(col));
-            }
-
-            mapArray.add(rsMap);
-        }
-
-        return mapArray;
-    }
-
-    /**
-     * Map the ResultSet to Map
-     * IMPORTANT!!! The ResultSet is closed by the jdbcTemplate after the RowMapper
-     *
-     * @param rs
-     * @param rowNum
-     * @return
-     * @throws SQLException
-     */
-    private Map<String, Object> __resultSet2Map(ResultSet rs, int rowNum)
-            throws SQLException
-    {
-        Map<String, Object> rsMap = new HashMap<>();
-        for (int col = 1; col <= rs.getMetaData().getColumnCount(); col++) {
-            rsMap.put(rs.getMetaData().getColumnName(col), rs.getObject(col));
-        }
-        return rsMap;
-    }
-
 
     /**
      *
