@@ -409,6 +409,26 @@ public class ProductResource {
         }
     }
 
+    @DeleteMapping("/product/{product_id}")
+    public ResponseEntity<Integer> deleteProduct(
+            @RequestHeader("Authorization") String auth,
+            @PathVariable int product_id
+    ) {
+        try {
+            // Get user id from token
+            Claims decodedToken     = __decodeJWT(auth);
+            int user_id             = (int) decodedToken.get("userId");
+
+            jdbcTemplate.update(
+                    "DELETE FROM products WHERE product_id = ? AND user_owned = ?",
+                    product_id, user_id
+            );
+
+            return new ResponseEntity<>(1, HttpStatus.OK);
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
     /****************************************************************/
     /** PRIVATE FUNCTIONS                                          **/
     /****************************************************************/

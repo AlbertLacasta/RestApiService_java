@@ -116,7 +116,10 @@ public class PublicResource {
         }
 
         if(!pattern.matcher(email).matches()) {
-            throw new Exception("Invalid email");
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Invalid email");
+
+            return new ResponseEntity<>(response, HttpStatus.NOT_ACCEPTABLE);
         }
 
         Integer count = jdbcTemplate.queryForObject(
@@ -125,7 +128,10 @@ public class PublicResource {
         );
 
         if(count > 0) {
-            throw new Exception("Email already in use");
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Email already in use");
+
+            return new ResponseEntity<>(response, HttpStatus.FOUND);
         }
 
         try {
