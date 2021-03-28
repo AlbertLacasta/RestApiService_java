@@ -4,6 +4,7 @@ import com.flashfind.flashfindapiservice.Constants;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -55,6 +56,37 @@ public class UserResource {
             throw new RuntimeException(e);
         }
     }
+
+    /**
+     *
+     * @return
+     */
+    @PutMapping("/user")
+    public ResponseEntity<Map<String, Object>> updateUser(
+            @RequestHeader("Authorization") String auth,
+            @RequestBody String data
+    ) {
+        try {
+            // Get user id from token
+            Claims decodedToken     = __decodeJWT(auth);
+            int userId             = (int) decodedToken.get("userId");
+
+            JSONObject json         = new JSONObject(data);
+            String user_username    = json.getString("user_username");
+            String user_email       = json.getString("user_email");
+            String user_firstname   = json.getString("user_firstname");
+            String user_lastname    = json.getString("user_lastname");
+
+            jdbcTemplate.update(
+                    "UPDATE users SET user_username = ?, user_email = ?, user_firstname = ?, user_lastname = ? WHERE user_id = ?",
+                    user_username, user_email, user_firstname, user_lastname, userId);
+
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     /**
      *
