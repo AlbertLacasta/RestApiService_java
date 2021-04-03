@@ -39,28 +39,42 @@ public class ProductResource {
      * @return
      */
     @GetMapping("/products")
-    public ResponseEntity<List<Map<String, Object>>> getProducts(@RequestParam(required = false) String query) {
+    public ResponseEntity<List<Map<String, Object>>> getProducts(
+            @RequestParam(required = false) String query,
+            @RequestParam(required = false) Integer category
+    ) {
         try {
             String searchQuery = "%";
             if (query != null) {
                 searchQuery += query + "%";
             }
 
-            List<Map<String, Object>> response = jdbcTemplate.queryForList(
-                "SELECT products.product_id, product_title, products.user_owned, favourites.fav_id IS NOT NULL, " +
+            String select = "SELECT products.product_id, product_title, products.user_owned, favourites.fav_id IS NOT NULL, " +
                     "(SELECT picture_data FROM pictures_product WHERE pictures_product.product_id = products.product_id LIMIT 1 ) picture_data " +
                     "FROM products " +
                     "FULL OUTER JOIN favourites on favourites.product_id = products.product_id " +
                     "WHERE active = true " +
-                    "AND products.product_id NOT IN (SELECT distinct sc.product_id FROM scanned sc WHERE products.product_id = sc.product_id AND products.multiscan = false ) " +
-                    "AND UPPER(product_title) LIKE ? " +
-                    "OR UPPER(product_desc) LIKE ? " +
-                    "ORDER BY date_created DESC",
-                    new Object[]{searchQuery, searchQuery}
+                    "AND products.product_id NOT IN (SELECT distinct sc.product_id FROM scanned sc WHERE products.product_id = sc.product_id AND products.multiscan = false ) ";
+
+            Object[] object = new Object[]{searchQuery, searchQuery};
+
+            if(category != null) {
+                select += "AND products.category_id = ? ";
+                object = new Object[]{category, searchQuery, searchQuery};
+            }
+
+            select += "AND UPPER(product_title) LIKE ? OR UPPER(product_desc) LIKE ? ORDER BY date_created DESC ";
+
+            System.out.print("select<<<<<<<<<<<<<<<<<< " + select);
+
+            List<Map<String, Object>> response = jdbcTemplate.queryForList(
+                    select,
+                    object
             );
 
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch(Exception e) {
+            System.out.print("e<<<<<<<<<<<<<<<<<< " + e.getMessage());
             throw new RuntimeException(e);
         }
     }
