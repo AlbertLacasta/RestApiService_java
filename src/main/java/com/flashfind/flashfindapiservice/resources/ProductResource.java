@@ -58,7 +58,7 @@ public class ProductResource {
 
             Object[] object = new Object[]{searchQuery, searchQuery};
 
-            if(category.length() > 0) {
+            if(category.length() > 0 && category != null) {
                 select = select.concat("AND products.category_id = ? ");
                 object = new Object[]{Integer.parseInt(category), searchQuery, searchQuery};
             }
