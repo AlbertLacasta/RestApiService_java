@@ -46,7 +46,8 @@ public class ProductResource {
         try {
             String searchQuery = "%";
             if (query != null) {
-                searchQuery += query + "%";
+                searchQuery = searchQuery.concat(query);
+                searchQuery = searchQuery.concat("%");
             }
 
             String select = "SELECT products.product_id, product_title, products.user_owned, favourites.fav_id IS NOT NULL, " +
@@ -59,13 +60,14 @@ public class ProductResource {
             Object[] object = new Object[]{searchQuery, searchQuery};
 
             if(category != null) {
-                select += "AND products.category_id = ? ";
+                select = select.concat("AND products.category_id = ? ");
                 object = new Object[]{category, searchQuery, searchQuery};
             }
 
-            select += "AND UPPER(product_title) LIKE ? OR UPPER(product_desc) LIKE ? ORDER BY date_created DESC ";
+            select = select.concat("AND (UPPER(product_title) LIKE ? OR UPPER(product_desc) LIKE ?) ORDER BY date_created DESC ");
 
             System.out.print("select<<<<<<<<<<<<<<<<<< " + select);
+            System.out.print("object<<<<<<<<<<<<<<<<<< " + object.toString());
 
             List<Map<String, Object>> response = jdbcTemplate.queryForList(
                     select,
