@@ -41,13 +41,12 @@ public class ProductResource {
     @GetMapping("/products")
     public ResponseEntity<List<Map<String, Object>>> getProducts(
             @RequestParam(required = false) String query,
-            @RequestParam(required = false) Integer category
+            @RequestParam(required = false) String category
     ) {
         try {
             String searchQuery = "%";
             if (query != null) {
-                searchQuery = searchQuery.concat(query);
-                searchQuery = searchQuery.concat("%");
+                searchQuery += query + "%";
             }
 
             String select = "SELECT products.product_id, product_title, products.user_owned, favourites.fav_id IS NOT NULL, " +
@@ -59,15 +58,12 @@ public class ProductResource {
 
             Object[] object = new Object[]{searchQuery, searchQuery};
 
-            if(category != null) {
+            if(category.length() > 0) {
                 select = select.concat("AND products.category_id = ? ");
-                object = new Object[]{category, searchQuery, searchQuery};
+                object = new Object[]{Integer.parseInt(category), searchQuery, searchQuery};
             }
 
             select = select.concat("AND (UPPER(product_title) LIKE ? OR UPPER(product_desc) LIKE ?) ORDER BY date_created DESC ");
-
-            System.out.print("select<<<<<<<<<<<<<<<<<< " + select);
-            System.out.print("object<<<<<<<<<<<<<<<<<< " + object.toString());
 
             List<Map<String, Object>> response = jdbcTemplate.queryForList(
                     select,
@@ -76,7 +72,6 @@ public class ProductResource {
 
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch(Exception e) {
-            System.out.print("e<<<<<<<<<<<<<<<<<< " + e.getMessage());
             throw new RuntimeException(e);
         }
     }
