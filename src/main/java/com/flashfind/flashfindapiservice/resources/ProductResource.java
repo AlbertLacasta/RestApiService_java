@@ -273,6 +273,22 @@ public class ProductResource {
         }
     }
 
+    @GetMapping("/product/{product_id}/images")
+    public ResponseEntity<List<Map<String, Object>>> getProductImages(
+            @PathVariable int product_id
+    ) {
+        try {
+            List<Map<String, Object>> response = jdbcTemplate.queryForList(
+                "SELECT picture_data FROM pictures_product WHERE product_id = ? ",
+                    new Object[]{product_id}
+            );
+
+            return new ResponseEntity<>(response,HttpStatus.OK);
+        } catch (EmptyResultDataAccessException e) {
+            return new ResponseEntity<>(new ArrayList<>(),HttpStatus.OK);
+        }
+    }
+
     @PostMapping("/product/{product_id}/image")
     public ResponseEntity<String> createProduct(
             @RequestBody String data,
