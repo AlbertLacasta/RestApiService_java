@@ -46,7 +46,8 @@ public class ProductResource {
         try {
             String searchQuery = "%";
             if (query != null) {
-                searchQuery += query + "%";
+                searchQuery = searchQuery.concat(query.toUpperCase());
+                searchQuery = searchQuery.concat("%");
             }
 
             String select = "SELECT products.product_id, product_title, products.user_owned, favourites.fav_id IS NOT NULL, " +
