@@ -308,6 +308,29 @@ public class ProductResource {
         }
     }
 
+    @PostMapping("/product/{product_id}/scann")
+    public ResponseEntity<Map<String, Boolean>> scannProduct(
+            @RequestHeader("Authorization") String auth,
+            @PathVariable int product_id
+    ) {
+        try {
+            Claims decodedToken = __decodeJWT(auth);
+            int user_id          = (int) decodedToken.get("userId");
+            java.sql.Date date   = (java.sql.Date) new Date();
+
+            jdbcTemplate.update(
+                    "INSERT INTO scanned(product_id, user_id, scanned_date) VALUES(?, ?, ?)",
+                    product_id, user_id, date
+            );
+
+            Map<String, Boolean> responseMap = new HashMap<>();
+            responseMap.put("scanned", true);
+            return new ResponseEntity<>(responseMap, HttpStatus.OK);
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     /**
      *
      * @param auth
