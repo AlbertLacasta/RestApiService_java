@@ -314,9 +314,9 @@ public class ProductResource {
             @PathVariable int product_id
     ) {
         try {
-            Claims decodedToken = __decodeJWT(auth);
-            int user_id          = (int) decodedToken.get("userId");
-            java.sql.Date date   = (java.sql.Date) new Date();
+            Claims decodedToken     = __decodeJWT(auth);
+            int user_id             = (int) decodedToken.get("userId");
+            Date date               = new Date();
 
             jdbcTemplate.update(
                     "INSERT INTO scanned(product_id, user_id, scanned_date) VALUES(?, ?, ?)",
