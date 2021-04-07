@@ -316,11 +316,10 @@ public class ProductResource {
         try {
             Claims decodedToken     = __decodeJWT(auth);
             int user_id             = (int) decodedToken.get("userId");
-            Date date               = new Date();
 
             jdbcTemplate.update(
-                    "INSERT INTO scanned(product_id, user_id, scanned_date) VALUES(?, ?, ?)",
-                    product_id, user_id, date
+                    "INSERT INTO scanned(product_id, user_id, scanned_date) VALUES(?, ?, CURRENT_DATE)",
+                    product_id, user_id
             );
 
             Map<String, Boolean> responseMap = new HashMap<>();
