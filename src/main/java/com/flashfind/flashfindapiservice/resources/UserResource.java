@@ -30,18 +30,12 @@ public class UserResource {
      */
     @GetMapping("/user")
     public ResponseEntity<Map<String, Object>> getUser(
-            @RequestHeader("Authorization") String auth,
-            @RequestParam(required = false) String user_id
+            @RequestHeader("Authorization") String auth
     ) {
         try {
             // Get user id from token
             Claims decodedToken     = __decodeJWT(auth);
             int userId             = (int) decodedToken.get("userId");
-
-            // If usr Id is provided thn use it
-            if (user_id != null) {
-                userId = Integer.parseInt(user_id);
-            }
 
             Map<String, Object> response = jdbcTemplate.queryForMap(
                     "SELECT user_email, user_username, user_firstname, user_lastname, user_register_date, user_picture, " +
