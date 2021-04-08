@@ -316,9 +316,11 @@ public class ProductResource {
         try {
             Claims decodedToken     = __decodeJWT(auth);
             int user_id             = (int) decodedToken.get("userId");
+            System.out.println("user_id: " + user_id);
+            System.out.println("product_id: " + product_id);
 
             jdbcTemplate.update(
-                    "INSERT INTO scanned(product_id, user_id, scanned_date) VALUES(?, ?, CURRENT_DATE)",
+                    "INSERT INTO scanned(scanned_date, product_id, user_id) VALUES(CURRENT_DATE, ?, ?)",
                     product_id, user_id
             );
 
