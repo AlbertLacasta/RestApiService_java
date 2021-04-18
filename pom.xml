@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.storm</groupId>
-	<artifactId>storm-api-service</artifactId>
+	<artifactId>java-api-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>storm-api-service</name>
 	<description>REST API </description>
@@ -17,7 +17,7 @@
 
 	<properties>
 		<java.version>1.8</java.version>
-		<start-class>com.flashfind.flashfindapiservice.FlashFindApiServiceApplication</start-class>
+		<start-class>com.sample.sampleapiservice.SampleApiServiceApplication</start-class>
 	</properties>
 
 	<dependencies>
@@ -119,7 +119,6 @@
 				<configuration>
 					<executable>true</executable>
 				</configuration>
-
 			</plugin>
 		</plugins>
 	</build>
